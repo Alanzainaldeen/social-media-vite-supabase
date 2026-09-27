@@ -39,7 +39,7 @@ export const CommentItem = ({comment, postId}: Props) => {
             replyContent,
             postId,
             comment.id,
-            user?.id,
+            user?.id || "",
             user?.user_metadata?.user_name
         ),
         onSuccess: () => {
