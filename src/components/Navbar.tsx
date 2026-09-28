@@ -7,7 +7,9 @@ export const Navbar = () => {
     const {signWithGitHup, signOut, user} = useAuth()
 
 
-const displayName = user?.user_metadata.user_name || user?.email;
+const displayName = user?.user_metadata?.user_name || user?.email;
+
+const closeMenu = () => setMenuOpen(false);
 
     return (
     <nav className="fixed top-0 w-full z-40 bg-[rgba(10,10,10,0.8)] backdrop-blur-lg border-b border-white/10 shadow-lg">
@@ -37,7 +39,7 @@ const displayName = user?.user_metadata.user_name || user?.email;
                             <button onClick={signOut} className="bg-red-500 px-3 py-1 rounded">Sign Out</button>
                         </div>
                     ) :
-                    <button onClick={signWithGitHup} className="bg-blue-500 px-3 py-1 rounded">Sign n with Github</button>
+                    <button onClick={signWithGitHup} className="bg-blue-500 px-3 py-1 rounded">Sign in with Github</button>
                 }
                 </div>
 
@@ -99,6 +101,41 @@ const displayName = user?.user_metadata.user_name || user?.email;
                         className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">
                             Create Community
                             </Link>
+                    </div>
+
+                    <div className="pt-4 border-t border-gray-800">
+                        {user ? (
+                            <div className="flex items-center justify-between px-2">
+                                <div className="flex items-center space-x-3">
+                                    {user.user_metadata?.avatar_url && (
+                                        <img src={user.user_metadata.avatar_url} 
+                                        alt="User Avatar" 
+                                        className="w-8 h-8 rounded-full object-cover"
+                                        />
+                                    )}
+                                    <span className="text-gray-300 font-medium">{displayName}</span>
+                                </div>
+                                <button
+                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-sm transition-colors"
+                                onClick={() => {
+                                    signOut();
+                                    closeMenu();
+                                }}
+                                >
+                                    Sign Out
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                            onClick={() => {
+                                signWithGitHup();
+                                closeMenu();
+                            }}
+                            className="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-center font-medium transition-colors"
+                            >
+                                Sign in with Github
+                            </button>
+                        )}
                     </div>
                 </div>
             )}
