@@ -3,6 +3,7 @@ import { supabase } from "../supabase-client"
 import { PostItem } from "./PostItem";
 
 export interface Post {
+    username: string;
     id: number;
     title: string;
     content: string;
