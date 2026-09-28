@@ -3,6 +3,7 @@ import React, { useState, type ChangeEvent } from "react"
 import { supabase } from "../supabase-client";
 import { useAuth } from "../context/AuthContext";
 import { fetchCommunities, type Community } from "./CommunityList";
+import { useNavigate } from "react-router";
 
 interface PostInput {
     title: string;
@@ -36,6 +37,8 @@ export const CreatePost = () => {
     const [title, setTitle] = useState<string>("")
     const [content, setContent] = useState<string>("")
     const [communityId, setCommunityId] = useState<number | null>(null);
+    
+    const navigate = useNavigate();
 
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -67,11 +70,29 @@ export const CreatePost = () => {
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
         if (!selectedFile) return;
-        mutate({post: {title, content,
-            avatar_url: user?.user_metadata.avatar_url || null, 
-            community_id: communityId}, 
-            imageFile: selectedFile})
-    }
+        
+        mutate(
+            {
+                post: {
+                    title, 
+                    content,
+                    avatar_url: user?.user_metadata.avatar_url || null, 
+                    community_id: communityId
+                }, 
+                imageFile: selectedFile
+            },
+            {
+                onSuccess: () => {
+                    // ✅ التنقل يحدث فقط بعد نجاح العملية
+                    navigate("/");
+                },
+                onError: (error) => {
+                    console.error("Error creating post:", error);
+                    // يمكنك إضافة رسالة خطأ هنا
+                }
+            }
+        );
+    };
 
     return(
         <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-4">

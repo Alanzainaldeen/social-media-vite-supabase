@@ -30,6 +30,9 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
     const signWithGitHup = async () => {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: "github",
+            options: {
+                redirectTo: window.location.origin // ✅ العودة لنفس الموقع
+            }
         });
     
         if (error) {

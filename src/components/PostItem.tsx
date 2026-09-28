@@ -8,14 +8,13 @@ interface Props {
 export const PostItem = ({ post }: Props) => {
   return (
     <div className="relative group w-full max-w-sm">
-      {/* Glow Effect */}
-      <div className="absolute -inset-1 rounded-3xl bg-linear-to-r from-pink-600 to-purple-600 opacity-0 blur-lg transition duration-500 group-hover:opacity-60" />
+      {/* تأثير التوهج الحديث */}
+      <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 blur-lg transition duration-500 group-hover:opacity-60 pointer-events-none" />
 
       <Link to={`/post/${post.id}`} className="relative block">
-        {/* Card */}
         <div className="relative rounded-3xl border border-[#3f4450] bg-[#181b20] overflow-hidden transition duration-300 group-hover:border-purple-500/50">
           {/* الصورة في الأعلى */}
-          <div className="relative aspect-square w-full overflow-hidden bg-linear-to-br from-purple-900/20 to-pink-900/20">
+          <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-purple-900/20 to-pink-900/20">
             {post.image_url ? (
               <img
                 src={post.image_url}
@@ -39,9 +38,7 @@ export const PostItem = ({ post }: Props) => {
                 </svg>
               </div>
             )}
-
-            {/* Overlay gradient */}
-            <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-[#181b20] to-transparent pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#181b20] to-transparent pointer-events-none" />
           </div>
 
           {/* المحتوى */}
@@ -51,24 +48,24 @@ export const PostItem = ({ post }: Props) => {
               {post.avatar_url ? (
                 <img
                   src={post.avatar_url}
-                  alt="User Avatar"
+                  alt="Avatar"
                   className="w-10 h-10 rounded-full object-cover ring-2 ring-purple-500/30"
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-linear-to-br from-purple-500 to-pink-600 ring-2 ring-purple-500/30" />
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 ring-2 ring-purple-500/30 flex items-center justify-center text-white font-bold">
+                  {post.username?.charAt(0).toUpperCase() || "U"}
+                </div>
               )}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-white truncate">
                   {post.username || "Anonymous"}
                 </p>
-                {post.created_at && (
-                  <p className="text-xs text-gray-400">
-                    {new Date(post.created_at).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </p>
-                )}
+                <p className="text-xs text-gray-400">
+                  {new Date(post.created_at).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </p>
               </div>
             </div>
 
@@ -79,18 +76,18 @@ export const PostItem = ({ post }: Props) => {
 
             {/* التفاعلات */}
             <div className="flex items-center gap-6 pt-2 border-t border-white/5">
-              <button className="flex items-center gap-2 text-gray-400 hover:text-pink-500 transition-colors">
-                <span className="text-lg">❤️</span>
+              <div className="flex items-center gap-2 text-gray-400">
+                <span>❤️</span>
                 <span className="text-sm font-semibold">
                   {post.like_count ?? 0}
                 </span>
-              </button>
-              <button className="flex items-center gap-2 text-gray-400 hover:text-purple-500 transition-colors">
-                <span className="text-lg">💬</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-400">
+                <span>💬</span>
                 <span className="text-sm font-semibold">
                   {post.comment_count ?? 0}
                 </span>
-              </button>
+              </div>
             </div>
           </div>
         </div>
