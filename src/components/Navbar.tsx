@@ -1,196 +1,230 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import { useAuth } from "../context/AuthContext";
 
-const links = [
-  { to: "/", label: "Home" },
-  { to: "/create", label: "Create Post" },
-  { to: "/communities", label: "Communities" },
-  { to: "/community/create", label: "Create Community" },
-];
-
 export const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { signWithGitHup, signOut, user, loading } = useAuth();
+  const { signWithGitHup, signOut, user } = useAuth();
 
-  const displayName =
-    user?.user_metadata?.user_name ||
-    user?.user_metadata?.full_name ||
-    user?.email ||
-    "User";
-  const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
+  const displayName = user?.user_metadata?.user_name || user?.email || "User";
 
   const closeMenu = () => setMenuOpen(false);
 
-  // ✅ إغلاق قائمة الموبايل تلقائياً عند التكبير لحجم الديسكتوب
-  useEffect(() => {
-    const onResize = () => {
-      if (window.innerWidth >= 1024) setMenuOpen(false);
-    };
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  const handleSignIn = async () => {
-    closeMenu();
-    await signWithGitHup();
-  };
-
-  const handleSignOut = async () => {
-    closeMenu();
-    await signOut();
+  // دالة ذكية: إذا كان مسجل دخول → خروج، إذا لم يكن → دخول
+  const handleAuthClick = () => {
+    if (user) {
+      signOut();
+    } else {
+      signWithGitHup();
+    }
   };
 
   return (
-    <nav className="fixed top-0 w-full z-40 bg-[rgba(10,10,10,0.8)] backdrop-blur-lg border-b border-white/10 shadow-lg">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="flex justify-between items-center h-16 gap-4">
-          <Link
-            to="/"
-            onClick={closeMenu}
-            className="font-mono text-xl font-bold text-white shrink-0"
-          >
-            Coder<span className="text-purple-500">.Hup</span>
-          </Link>
-
-          {/* Desktop Links */}
-          {/* ❌ كان md:flex — عند 768px لا يوجد مكان كافٍ بعد تسجيل الدخول */}
-          {/* ✅ صار lg:flex (1024px) */}
-          <div className="hidden lg:flex items-center gap-8">
-            {links.map((l) => (
-              <Link
-                key={l.to}
-                to={l.to}
-                className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
-              >
-                {l.label}
-              </Link>
-            ))}
-          </div>
-
-          {/* Desktop Auth */}
-          <div className="hidden lg:flex items-center shrink-0">
-            {loading ? (
-              <div className="h-8 w-36 rounded bg-white/10 animate-pulse" />
-            ) : user ? (
-              <div className="flex items-center gap-3">
-                {avatarUrl && (
-                  <img
-                    src={avatarUrl}
-                    alt="User Avatar"
-                    className="w-8 h-8 rounded-full object-cover shrink-0"
-                  />
-                )}
-                {/* ✅ truncate حتى لا يكسر الإيميل الطويل الـ Navbar */}
-                <span
-                  className="text-gray-300 max-w-[140px] truncate"
-                  title={displayName}
-                >
-                  {displayName}
-                </span>
-                <button
-                  onClick={handleSignOut}
-                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded whitespace-nowrap transition-colors"
-                >
-                  Sign Out
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={handleSignIn}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded whitespace-nowrap transition-colors"
-              >
-                Sign in with GitHub {/* ✅ كانت Sign n */}
-              </button>
-            )}
-          </div>
-          {/* Mobile Menu Button */}
-          <div className="lg:hidden">
-            <button
-              onClick={() => setMenuOpen((prev) => !prev)}
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={menuOpen}
-              className="text-white p-1"
+    <>
+      {/* 1. الشريط العلوي الثابت */}
+      <nav className="fixed top-0 w-full z-50 bg-[rgba(10,10,10,0.8)] backdrop-blur-lg border-b border-white/10 shadow-lg">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="flex justify-between items-center h-16">
+            {/* الشعار */}
+            <Link
+              to="/"
+              className="font-mono text-xl font-bold text-white"
+              onClick={closeMenu}
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                {menuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                )}
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
+              Coder<span className="text-purple-500">.Hup</span>
+            </Link>
 
-      {/* Mobile Menu */}
-      {menuOpen && (
-        <div className="lg:hidden border-t border-white/10 bg-[rgba(10,10,10,0.95)] max-h-[calc(100vh-4rem)] overflow-y-auto">
-          <div className="px-2 pt-2 pb-3 space-y-1">
-            {links.map((l) => (
+            {/* روابط سطح المكتب */}
+            <div className="hidden md:flex items-center space-x-8">
               <Link
-                key={l.to}
-                to={l.to}
-                onClick={closeMenu} // ❌ كان ناقصاً: القائمة تبقى مفتوحة فوق المحتوى
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+                to="/"
+                className="text-gray-300 hover:text-white transition-colors"
               >
-                {l.label}
+                Home
               </Link>
-            ))}
-          </div>
+              <Link
+                to="/create"
+                className="text-gray-300 hover:text-white transition-colors"
+              >
+                Create Post
+              </Link>
+              <Link
+                to="/communities"
+                className="text-gray-300 hover:text-white transition-colors"
+              >
+                Communities
+              </Link>
+              <Link
+                to="/community/create"
+                className="text-gray-300 hover:text-white transition-colors"
+              >
+                Create Community
+              </Link>
+            </div>
 
-          <div className="pt-4 pb-4 border-t border-gray-800 px-2">
-            {loading ? (
-              <div className="h-10 w-full rounded bg-white/10 animate-pulse" />
-            ) : user ? (
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  {avatarUrl && (
+            {/* مصادقة سطح المكتب */}
+            <div className="hidden md:flex items-center">
+              {user ? (
+                <div className="flex items-center space-x-4">
+                  {user.user_metadata?.avatar_url && (
                     <img
-                      src={avatarUrl}
+                      src={user.user_metadata.avatar_url}
                       alt="User Avatar"
-                      className="w-8 h-8 rounded-full object-cover shrink-0"
+                      className="w-8 h-8 rounded-full object-cover border border-white/20"
                     />
                   )}
-                  <span className="text-gray-300 font-medium truncate">
-                    {displayName}
-                  </span>
+                  <span className="text-gray-300 text-sm">{displayName}</span>
+                  <button
+                    onClick={signOut}
+                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-sm transition-colors"
+                  >
+                    Sign Out
+                  </button>
                 </div>
+              ) : (
                 <button
-                  onClick={handleSignOut}
-                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-sm transition-colors shrink-0"
+                  onClick={signWithGitHup}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2"
                 >
-                  Sign Out
+                  <svg
+                    className="w-4 h-4"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                  </svg>
+                  Sign in
                 </button>
-              </div>
-            ) : (
+              )}
+            </div>
+
+            {/* 📱 قسم الموبايل: زر المصادقة الذكي + زر القائمة */}
+            <div className="md:hidden flex items-center gap-2">
+              {/* ✅ زر المصادقة الذكي - يظهر دائماً */}
               <button
-                onClick={handleSignIn}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-center font-medium transition-colors"
+                onClick={handleAuthClick}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-bold transition-colors shadow-md ${
+                  user
+                    ? "bg-red-600 hover:bg-red-700 text-white"
+                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                }`}
               >
-                Sign in with GitHub
+                {user ? (
+                  <>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                      />
+                    </svg>
+                    <span>Logout</span>
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="w-4 h-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                    </svg>
+                    <span>Login</span>
+                  </>
+                )}
               </button>
-            )}
+
+              {/* زر فتح/إغلاق القائمة */}
+              <button
+                onClick={() => setMenuOpen((prev) => !prev)}
+                className="text-white p-2 hover:bg-white/10 rounded-md transition-colors"
+                aria-label="Toggle menu"
+              >
+                {menuOpen ? (
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
         </div>
+      </nav>
+
+      {/* 2. قائمة الموبايل المنسدلة (روابط فقط) */}
+      {menuOpen && (
+        <>
+          {/* خلفية معتمة */}
+          <div
+            className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden"
+            onClick={closeMenu}
+          />
+
+          {/* حاوية القائمة */}
+          <div className="fixed top-16 left-0 w-full z-40 md:hidden bg-[rgba(10,10,10,0.98)] border-b border-white/10 max-h-[calc(100vh-4rem)] overflow-y-auto shadow-2xl">
+            <div className="px-4 py-4 space-y-2">
+              <Link
+                to="/"
+                className="block px-4 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-all"
+                onClick={closeMenu}
+              >
+                Home
+              </Link>
+              <Link
+                to="/create"
+                className="block px-4 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-all"
+                onClick={closeMenu}
+              >
+                Create Post
+              </Link>
+              <Link
+                to="/communities"
+                className="block px-4 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-all"
+                onClick={closeMenu}
+              >
+                Communities
+              </Link>
+              <Link
+                to="/community/create"
+                className="block px-4 py-3 rounded-lg text-base font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-all"
+                onClick={closeMenu}
+              >
+                Create Community
+              </Link>
+            </div>
+          </div>
+        </>
       )}
-    </nav>
+    </>
   );
 };
